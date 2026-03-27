@@ -7,12 +7,14 @@ import Profile from './pages/Profile';
 import FindRooms from './pages/FindRooms';
 import CreateRoom from './pages/CreateRoom';
 import OwnerDashboard from './pages/OwnerDashboard';
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-        <Navbar />
+    <ThemeProvider>
+      <Router>
+        <div className="min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-300 ease-in-out">
+          <Navbar />
         <main>
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -36,6 +38,7 @@ function App() {
         </main>
       </div>
     </Router>
+    </ThemeProvider>
   );
 }
 

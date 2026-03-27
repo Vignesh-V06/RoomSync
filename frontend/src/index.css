@@ -9,13 +9,43 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  :root {
+    --bg-page: #ffffff;
+    --text-page: #0f172a;
+  }
+
+  .dark {
+    --bg-page: #0f172a;
+    --text-page: #f8fafc;
+  }
+
   body {
-    @apply bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans tracking-tight transition-colors duration-300;
+    background-color: var(--bg-page);
+    color: var(--text-page);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    @apply font-sans tracking-tight;
+  }
+
+  /* Scrollbars globally styled */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full dark:bg-slate-700;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-600;
   }
 }
 
 .glass-panel {
-  @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/20 dark:border-slate-700/50 shadow-xl rounded-2xl transition-colors duration-300;
+  @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/20 dark:border-slate-700/50 shadow-xl rounded-2xl transition-all duration-300 ease-in-out;
 }
 
 .input-field {

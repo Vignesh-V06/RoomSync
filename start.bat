@@ -9,10 +9,10 @@ echo Example: mysql -u root -p roomsync ^< backend\schema.sql
 echo.
 
 echo Starting backend...
-start cmd.exe /c "cd backend && npm start"
+start cmd.exe /k "cd backend && npm start"
 
 echo Starting frontend...
-start cmd.exe /c "cd frontend && npm run dev"
+start cmd.exe /k "cd frontend && npm run dev"
 
 echo.
 echo Application started! 
