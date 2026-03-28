@@ -13,6 +13,8 @@ const ChatDashboard = () => {
   const [loading, setLoading] = useState(true);
   
   const messagesEndRef = useRef(null);
+  const activeRoomRef = useRef(null); // Ref for accurate socket closures
+  
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const [socket, setSocket] = useState(null);
 
@@ -22,22 +24,28 @@ const ChatDashboard = () => {
       try {
         const { data } = await api.get('/rooms/my-groups');
         setRooms(data);
+        
+        // Join all rooms in socket immediately for global listening
+        const s = initSocket(user?.id);
+        setSocket(s);
+        
+        data.forEach(r => {
+          s.emit('join_room', r.room_id);
+        });
+
       } catch (err) {
         console.error("Failed to load rooms", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchRooms();
-    
-    if (user?.id) {
-      setSocket(initSocket(user.id));
-    }
+    if (user?.id) fetchRooms();
   }, [user?.id]);
 
-  // Handle active room change & fetch messages
+  // Update ref when active room changes
   useEffect(() => {
-    if (!activeRoom || !socket) return;
+    activeRoomRef.current = activeRoom;
+    if (!activeRoom) return;
     
     setMessages([]); // Reset until loaded
     
@@ -45,17 +53,37 @@ const ChatDashboard = () => {
       try {
         const { data } = await api.get(`/chat/${activeRoom.room_id}`);
         setMessages(data);
-        
-        socket.emit('join_room', activeRoom.room_id);
       } catch (err) {
         console.error("Failed to load messages", err);
       }
     };
     
     fetchMessages();
+  }, [activeRoom]);
+
+  // Global Socket Listener
+  useEffect(() => {
+    if (!socket) return;
 
     const handleReceiveMessage = (msg) => {
-      setMessages(prev => [...prev, msg]);
+      // 1. If message is for active room, render it natively (if not sent by us, otherwise handleSend handles it)
+      if (activeRoomRef.current && msg.room_id === activeRoomRef.current.room_id && msg.sender_id !== user.id) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === msg.id)) return prev; // Prevent duplicates
+          return [...prev, msg];
+        });
+      }
+      
+      // 2. Safely pull this room to the very top dynamically
+      setRooms(prevRooms => {
+        const roomIndex = prevRooms.findIndex(r => r.room_id === msg.room_id);
+        if (roomIndex > -1) {
+          const newRooms = [...prevRooms];
+          const [updatedRoom] = newRooms.splice(roomIndex, 1);
+          return [updatedRoom, ...newRooms];
+        }
+        return prevRooms;
+      });
     };
 
     socket.on('receive_message', handleReceiveMessage);
@@ -63,7 +91,7 @@ const ChatDashboard = () => {
     return () => {
       socket.off('receive_message', handleReceiveMessage);
     };
-  }, [activeRoom, socket]);
+  }, [socket, user.id]);
 
   // Auto scroll
   useEffect(() => {
@@ -73,10 +101,34 @@ const ChatDashboard = () => {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !activeRoom) return;
+    
+    const messageContent = newMessage;
+    setNewMessage(''); // Clear input instantly
+
+    // Instantly append to messages for instant visual feedback
+    const optimisticMessage = {
+      id: Date.now(), // Temporary ID
+      room_id: activeRoom.room_id,
+      sender_id: user.id,
+      sender_name: 'You',
+      message: messageContent,
+      created_at: new Date().toISOString()
+    };
+    setMessages(prev => [...prev, optimisticMessage]);
+
+    // Update sidebar instantly
+    setRooms(prevRooms => {
+      const roomIndex = prevRooms.findIndex(r => r.room_id === activeRoom.room_id);
+      if (roomIndex > -1) {
+        const newRooms = [...prevRooms];
+        const [updatedRoom] = newRooms.splice(roomIndex, 1);
+        return [updatedRoom, ...newRooms];
+      }
+      return prevRooms;
+    });
 
     try {
-      await api.post(`/chat/${activeRoom.room_id}`, { message: newMessage });
-      setNewMessage('');
+      await api.post(`/chat/${activeRoom.room_id}`, { message: messageContent });
     } catch (err) {
       console.error(err);
     }

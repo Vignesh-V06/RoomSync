@@ -86,10 +86,12 @@ exports.getMyGroups = async (req, res) => {
     // Get rooms the user is accepted in
     const [rooms] = await pool.query(`
       SELECT DISTINCT r.room_id, r.block, r.room_type, r.owner_id,
-      (SELECT name FROM users WHERE id = r.owner_id) as owner_name
+      (SELECT name FROM users WHERE id = r.owner_id) as owner_name,
+      (SELECT MAX(created_at) FROM chat_messages WHERE room_id = r.room_id) as last_activity
       FROM rooms r
       LEFT JOIN room_requests rq ON r.room_id = rq.room_id
       WHERE r.owner_id = ? OR (rq.user_id = ? AND rq.status = 'accepted')
+      ORDER BY last_activity DESC
     `, [userId, userId]);
 
     res.json(rooms);
