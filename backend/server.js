@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const http = require('http');
 
 dotenv.config();
 
@@ -18,6 +19,10 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+const server = http.createServer(app);
+const socket = require('./socket');
+socket.init(server);
+
+server.listen(PORT, () => {
+    console.log(`Server and Socket are running on port ${PORT}`);
 });

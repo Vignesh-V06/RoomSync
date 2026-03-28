@@ -1,31 +1,36 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiEdit2, FiMapPin, FiBook, FiBriefcase, FiHeart, FiSettings, FiCheck } from 'react-icons/fi';
 import api from '../api';
+import toast from 'react-hot-toast';
 
 const Profile = () => {
-  const [formData, setFormData] = useState({
-    language: 'English',
-    branch: 'Computer Science',
-    cgpa_range: '8-9',
-    bed_pref: 'lower',
-    expected_members: 2,
-    sleep_pref: 'Night Owl',
-    study_pref: 'Total Silence',
-    food_pref: 'Vegetarian',
-    cleanliness: 'Moderate'
-  });
+  const [profile, setProfile] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
+  
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const navigate = useNavigate();
+
+  const defaultFormData = {
+    bio: '', skills: '', interests: '', academic_details: '',
+    language: 'English', branch: 'Computer Science', cgpa_range: '8-9',
+    bed_pref: 'lower', expected_members: 2, sleep_pref: 'Night Owl',
+    study_pref: 'Total Silence', food_pref: 'Vegetarian', cleanliness: 'Moderate'
+  };
+
+  const [formData, setFormData] = useState(defaultFormData);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const { data } = await api.get(`/profiles/${user.id}`);
-        setFormData(data);
+        setProfile(data);
+        setFormData(prev => ({ ...prev, ...data }));
       } catch (err) {
-        console.log('No profile found, please create one');
+        toast.error('Complete your profile to unlock all features!');
+        setIsEditing(true);
       } finally {
         setLoading(false);
       }
@@ -37,112 +42,249 @@ const Profile = () => {
     e.preventDefault();
     try {
       await api.post('/profiles', formData);
-      setMessage('Profile updated successfully!');
-      setTimeout(() => navigate('/find-rooms'), 1500);
+      toast.success('Profile updated successfully!');
+      setProfile({...profile, ...formData, user_name: user?.name || profile?.user_name});
+      setIsEditing(false);
     } catch (err) {
-      setMessage('Failed to update profile');
+      toast.error('Failed to update profile');
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Loading profile...</div>;
+  if (loading) return <div className="p-12 text-center text-slate-500 animate-pulse">Loading amazing profile...</div>;
+
+  const avatarUrl = `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.name || user?.id}&backgroundColor=e2e8f0`;
+  const name = profile?.user_name || user?.name || 'New User';
 
   return (
-    <div className="max-w-4xl mx-auto p-6 mt-8">
-      <div className="glass-panel p-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent mb-6">Build Your Profile</h1>
-        <p className="text-slate-600 mb-8">Tell us about your preferences to find the best roommate match.</p>
+    <div className="max-w-6xl mx-auto p-4 md:p-6 mt-4">
+      <div className="flex flex-col md:flex-row gap-8">
         
-        {message && (
-          <div className={`p-4 rounded-lg mb-6 ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-            {message}
-          </div>
-        )}
+        {/* LEFT SIDEBAR (GitHub Style) */}
+        <div className="w-full md:w-1/3 lg:w-1/4">
+          <div className="glass-panel p-6 sticky top-24">
+            <div className="relative">
+              <img src={avatarUrl} alt="Avatar" className="w-48 h-48 mx-auto rounded-full border-4 border-white dark:border-slate-700 shadow-xl object-cover bg-white" />
+              <div className="absolute bottom-2 right-10 bg-green-500 w-5 h-5 rounded-full border-2 border-white dark:border-slate-800"></div>
+            </div>
+            
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mt-6 text-center md:text-left">{name}</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm text-center md:text-left mb-4">@{name.toLowerCase().replace(/\s/g, '')}</p>
+            
+            {profile?.bio && <p className="text-slate-700 dark:text-slate-300 mb-6 text-sm">{profile.bio}</p>}
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Language</label>
-            <input 
-              type="text" 
-              className="input-field" 
-              value={formData.language} 
-              onChange={e => setFormData({...formData, language: e.target.value})}
-              placeholder="e.g., English, Spanish"
-              required
-            />
+            <button 
+              onClick={() => setIsEditing(!isEditing)}
+              className="w-full btn-secondary flex items-center justify-center gap-2 mb-6 shadow-sm"
+            >
+              {isEditing ? <><FiCheck /> View Profile</> : <><FiEdit2 /> Edit Profile</>}
+            </button>
+
+            <div className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
+              {profile?.branch && (
+                <div className="flex items-center gap-3">
+                  <FiBook className="text-primary dark:text-indigo-400" />
+                  <span>{profile.branch}</span>
+                </div>
+              )}
+              {profile?.academic_details && (
+                <div className="flex items-center gap-3">
+                  <FiBriefcase className="text-primary dark:text-indigo-400" />
+                  <span>{profile.academic_details}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <FiMapPin className="text-primary dark:text-indigo-400" />
+                <span>VIT Vellore campus</span>
+              </div>
+            </div>
+
+            <hr className="my-6 border-slate-200 dark:border-slate-700" />
+
+            {/* Tags / Badges */}
+            <div className="mb-4">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Skills & Hobbies</h3>
+              <div className="flex flex-wrap gap-2">
+                {profile?.skills?.split(',').map((s, i) => (
+                  <span key={i} className="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-medium border border-indigo-100 dark:border-indigo-800/50">
+                    {s.trim()}
+                  </span>
+                ))}
+                {profile?.interests?.split(',').map((s, i) => (
+                  <span key={`int_${i}`} className="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-md text-xs font-medium border border-emerald-100 dark:border-emerald-800/50">
+                    {s.trim()}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Branch</label>
-            <select className="input-field" value={formData.branch} onChange={e => setFormData({...formData, branch: e.target.value})}>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Mechanical">Mechanical</option>
-              <option value="Civil">Civil</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">CGPA Range</label>
-            <select className="input-field" value={formData.cgpa_range} onChange={e => setFormData({...formData, cgpa_range: e.target.value})}>
-              <option value="9-10">9-10</option>
-              <option value="8-9">8-9</option>
-              <option value="7-8">7-8</option>
-              <option value="Below 7">Below 7</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Bed Preference</label>
-            <select className="input-field" value={formData.bed_pref} onChange={e => setFormData({...formData, bed_pref: e.target.value})}>
-              <option value="lower">Lower Bed</option>
-              <option value="upper">Upper Bed</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Expected Members in Room</label>
-            <input 
-              type="number" 
-              min="1" max="4" 
-              className="input-field" 
-              value={formData.expected_members} 
-              onChange={e => setFormData({...formData, expected_members: parseInt(e.target.value)})}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Sleep Preference</label>
-            <select className="input-field" value={formData.sleep_pref} onChange={e => setFormData({...formData, sleep_pref: e.target.value})}>
-              <option value="Early Bird">Early Bird</option>
-              <option value="Night Owl">Night Owl</option>
-              <option value="Flexible">Flexible</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Study Preference</label>
-            <select className="input-field" value={formData.study_pref} onChange={e => setFormData({...formData, study_pref: e.target.value})}>
-              <option value="Total Silence">Total Silence</option>
-              <option value="Background Music">Background Music</option>
-              <option value="Group Study">Group Study</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Food Preference</label>
-            <select className="input-field" value={formData.food_pref} onChange={e => setFormData({...formData, food_pref: e.target.value})}>
-              <option value="Vegetarian">Vegetarian</option>
-              <option value="Non-Vegetarian">Non-Vegetarian</option>
-              <option value="Vegan">Vegan</option>
-              <option value="Any">Any</option>
-            </select>
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">Cleanliness</label>
-            <select className="input-field" value={formData.cleanliness} onChange={e => setFormData({...formData, cleanliness: e.target.value})}>
-              <option value="Neat Freak">Neat Freak</option>
-              <option value="Moderate">Moderate</option>
-              <option value="Messy">Messy</option>
-            </select>
-          </div>
+        </div>
+
+        {/* RIGHT MAIN CONTENT */}
+        <div className="w-full md:w-2/3 lg:w-3/4">
           
-          <div className="md:col-span-2 mt-4">
-            <button type="submit" className="btn-primary w-full">Save Profile</button>
-          </div>
-        </form>
+          {/* TABS Navigation */}
+          {!isEditing && (
+            <div className="flex border-b border-slate-200 dark:border-slate-700 mb-6 overflow-x-auto hide-scrollbar">
+              <button onClick={() => setActiveTab('overview')} className={`pb-4 px-4 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'border-b-2 border-primary text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                Overview
+              </button>
+              <button onClick={() => setActiveTab('rooms')} className={`pb-4 px-4 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === 'rooms' ? 'border-b-2 border-primary text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                My Rooms
+              </button>
+              <button onClick={() => setActiveTab('preferences')} className={`pb-4 px-4 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === 'preferences' ? 'border-b-2 border-primary text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                Living Preferences
+              </button>
+            </div>
+          )}
+
+          {isEditing ? (
+            <div className="glass-panel p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Edit Profile</h2>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b border-slate-100 dark:border-slate-700 pb-2">Basic Info</h3>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Bio</label>
+                    <textarea className="input-field min-h-[100px]" value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} placeholder="Write a short summary about yourself..."></textarea>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Skills (comma separated)</label>
+                      <input type="text" className="input-field" value={formData.skills} onChange={e => setFormData({...formData, skills: e.target.value})} placeholder="React, Python, Design..."/>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Interests (comma separated)</label>
+                      <input type="text" className="input-field" value={formData.interests} onChange={e => setFormData({...formData, interests: e.target.value})} placeholder="Gaming, Music, Reading..."/>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Academic Status</label>
+                      <input type="text" className="input-field" value={formData.academic_details} onChange={e => setFormData({...formData, academic_details: e.target.value})} placeholder="B.Tech 3rd Year..."/>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Language</label>
+                      <input type="text" className="input-field" value={formData.language} onChange={e => setFormData({...formData, language: e.target.value})} required />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-6">
+                  <h3 className="text-lg font-semibold border-b border-slate-100 dark:border-slate-700 pb-2">Roommate Preferences</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Branch</label>
+                      <select className="input-field" value={formData.branch} onChange={e => setFormData({...formData, branch: e.target.value})}>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Civil">Civil</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Sleep Preference</label>
+                      <select className="input-field" value={formData.sleep_pref} onChange={e => setFormData({...formData, sleep_pref: e.target.value})}>
+                        <option value="Early Bird">Early Bird</option>
+                        <option value="Night Owl">Night Owl</option>
+                        <option value="Flexible">Flexible</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Study Preference</label>
+                      <select className="input-field" value={formData.study_pref} onChange={e => setFormData({...formData, study_pref: e.target.value})}>
+                        <option value="Total Silence">Total Silence</option>
+                        <option value="Background Music">Background Music</option>
+                        <option value="Group Study">Group Study</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Food Preference</label>
+                      <select className="input-field" value={formData.food_pref} onChange={e => setFormData({...formData, food_pref: e.target.value})}>
+                        <option value="Vegetarian">Vegetarian</option>
+                        <option value="Non-Vegetarian">Non-Vegetarian</option>
+                        <option value="Vegan">Vegan</option>
+                        <option value="Any">Any</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Cleanliness</label>
+                      <select className="input-field" value={formData.cleanliness} onChange={e => setFormData({...formData, cleanliness: e.target.value})}>
+                        <option value="Neat Freak">Neat Freak</option>
+                        <option value="Moderate">Moderate</option>
+                        <option value="Messy">Messy</option>
+                      </select>
+                    </div>
+                    <div>
+                       <label className="block text-sm font-medium mb-1">Bed Preference</label>
+                       <select className="input-field" value={formData.bed_pref} onChange={e => setFormData({...formData, bed_pref: e.target.value})}>
+                         <option value="lower">Lower</option>
+                         <option value="upper">Upper</option>
+                       </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button type="submit" className="btn-primary flex-1">Save Changes</button>
+                  <button type="button" onClick={() => setIsEditing(false)} className="btn-secondary">Cancel</button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div className="animate-in fade-in duration-500">
+              {activeTab === 'overview' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="glass-panel p-6 border-t-4 border-t-primary">
+                     <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><FiHeart className="text-primary"/> About Me</h3>
+                     {profile?.bio ? (
+                       <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">{profile.bio}</p>
+                     ) : (
+                       <p className="text-slate-400 italic text-sm">No bio provided yet.</p>
+                     )}
+                   </div>
+                   
+                   <div className="glass-panel p-6 border-t-4 border-t-accent">
+                     <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><FiSettings className="text-accent"/> Setup Focus</h3>
+                     <div className="space-y-3">
+                        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                          <span className="text-sm font-medium">Study Vibe</span>
+                          <span className="text-sm font-bold text-accent">{profile?.study_pref || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                          <span className="text-sm font-medium">Circadian Rhythm</span>
+                          <span className="text-sm font-bold text-accent">{profile?.sleep_pref || 'N/A'}</span>
+                        </div>
+                     </div>
+                   </div>
+                </div>
+              )}
+
+              {activeTab === 'rooms' && (
+                <div className="glass-panel p-12 text-center text-slate-500">
+                   <div className="text-5xl mb-4">🏠</div>
+                   <p className="text-lg font-medium">You haven't joined any rooms yet.</p>
+                   <button onClick={() => navigate('/find-rooms')} className="mt-4 btn-primary text-sm px-4 py-2">Find Rooms</button>
+                </div>
+              )}
+
+              {activeTab === 'preferences' && (
+                <div className="glass-panel p-6 grid grid-cols-2 sm:grid-cols-3 gap-6">
+                  {['Language', 'Branch', 'Food Preference', 'Cleanliness', 'Bed Preference', 'CGPA Range'].map((label, idx) => {
+                    const keys = ['language', 'branch', 'food_pref', 'cleanliness', 'bed_pref', 'cgpa_range'];
+                    const val = profile ? profile[keys[idx]] : 'N/A';
+                    return (
+                      <div key={idx} className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700">
+                        <span className="block text-xs uppercase tracking-wider text-slate-400 font-bold mb-1">{label}</span>
+                        <span className="block font-semibold text-slate-800 dark:text-slate-200">{val || 'N/A'}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
       </div>
     </div>
   );

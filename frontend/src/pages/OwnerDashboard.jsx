@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api';
 
 const OwnerDashboard = () => {
@@ -61,41 +62,44 @@ const OwnerDashboard = () => {
               <div className="p-6 md:w-1/3 bg-slate-50/50 border-r border-slate-100 flex flex-col justify-center">
                 <div className="mb-4">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Applicant</span>
-                  <h3 className="text-xl font-bold text-slate-800">{req.applicant_name}</h3>
-                  <a href={`mailto:${req.applicant_email}`} className="text-sm text-primary hover:underline">{req.applicant_email}</a>
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{req.applicant_name}</h3>
+                  <a href={`mailto:${req.applicant_email}`} className="text-sm text-primary dark:text-indigo-400 hover:underline">{req.applicant_email}</a>
                 </div>
-                <div className="p-3 bg-white rounded shadow-sm border border-slate-100">
+                <div className="p-3 bg-white dark:bg-slate-700/50 rounded shadow-sm border border-slate-100 dark:border-slate-600 mb-4">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Applying for</span>
-                  <p className="font-semibold text-slate-700">{req.block} <span className="font-normal text-slate-500">• {req.room_type}</span></p>
+                  <p className="font-semibold text-slate-700 dark:text-slate-200">{req.block} <span className="font-normal text-slate-500 dark:text-slate-400">• {req.room_type}</span></p>
                 </div>
+                <Link to={`/chat/${req.room_id}`} className="w-full inline-block text-center text-sm font-semibold text-primary dark:text-indigo-400 hover:text-indigo-600 border border-primary/20 dark:border-indigo-500/30 rounded py-2 bg-indigo-50/50 dark:bg-indigo-900/20">
+                  💬 Go to Room Chat
+                </Link>
               </div>
               
               <div className="p-6 md:w-2/3">
                 <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Applicant Profile Details</h4>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6 mb-6">
                   <div>
-                    <span className="text-xs text-slate-500 block">Language</span>
-                    <span className="font-medium text-slate-800">{req.language || 'N/A'}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 block">Language</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{req.language || 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="text-xs text-slate-500 block">Branch</span>
-                    <span className="font-medium text-slate-800">{req.branch || 'N/A'}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 block">Branch</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{req.branch || 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="text-xs text-slate-500 block">CGPA Range</span>
-                    <span className="font-medium text-slate-800">{req.cgpa_range || 'N/A'}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 block">CGPA Range</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{req.cgpa_range || 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="text-xs text-slate-500 block">Sleep Preference</span>
-                    <span className="font-medium text-slate-800">{req.sleep_pref || 'N/A'}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 block">Sleep Preference</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{req.sleep_pref || 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="text-xs text-slate-500 block">Study Environment</span>
-                    <span className="font-medium text-slate-800">{req.study_pref || 'N/A'}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 block">Study Environment</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{req.study_pref || 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="text-xs text-slate-500 block">Food Preference</span>
-                    <span className="font-medium text-slate-800">{req.food_pref || 'N/A'}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 block">Food Preference</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{req.food_pref || 'N/A'}</span>
                   </div>
                 </div>
                 

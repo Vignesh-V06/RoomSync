@@ -1,4 +1,5 @@
 const pool = require('../db/config');
+const socket = require('../socket');
 
 exports.applyRoom = async (req, res) => {
   try {
@@ -72,6 +73,22 @@ exports.acceptRequest = async (req, res) => {
     
     // Update Room Occupancy
     await pool.query("UPDATE rooms SET current_occupancy = current_occupancy + 1 WHERE room_id = ?", [request.room_id]);
+
+    // Create Notification and Emit
+    const message = `Your request to join room ${request.block} (${request.room_type}) has been accepted!`;
+    const [result] = await pool.query(
+      "INSERT INTO notifications (user_id, message) VALUES (?, ?)", 
+      [request.user_id, message]
+    );
+
+    const io = socket.getIo();
+    io.to(`user_${request.user_id}`).emit('new_notification', {
+      id: result.insertId,
+      user_id: request.user_id,
+      message,
+      is_read: 0,
+      created_at: new Date()
+    });
 
     res.json({ message: 'Request accepted successfully' });
   } catch (error) {

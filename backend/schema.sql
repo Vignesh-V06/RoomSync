@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS profiles (
   user_id INT PRIMARY KEY,
+  bio TEXT,
+  skills VARCHAR(255),
+  interests VARCHAR(255),
+  academic_details VARCHAR(255),
   language VARCHAR(50),
   branch VARCHAR(50),
   cgpa_range VARCHAR(10),
@@ -43,4 +47,23 @@ CREATE TABLE IF NOT EXISTS room_requests (
   UNIQUE(room_id, user_id),
   FOREIGN KEY (room_id) REFERENCES rooms(room_id),
   FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  room_id INT NOT NULL,
+  sender_id INT NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE CASCADE,
+  FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 );

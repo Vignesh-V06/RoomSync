@@ -7,13 +7,16 @@ import Profile from './pages/Profile';
 import FindRooms from './pages/FindRooms';
 import CreateRoom from './pages/CreateRoom';
 import OwnerDashboard from './pages/OwnerDashboard';
+import RoomChat from './pages/RoomChat';
 import { ThemeProvider } from './context/ThemeContext';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <ThemeProvider>
       <Router>
         <div className="min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-300 ease-in-out">
+          <Toaster position="top-right" />
           <Navbar />
         <main>
           <Routes>
@@ -31,6 +34,9 @@ function App() {
             } />
             <Route path="/dashboard" element={
               <ProtectedRoute><OwnerDashboard /></ProtectedRoute>
+            } />
+            <Route path="/chat/:roomId" element={
+              <ProtectedRoute><RoomChat /></ProtectedRoute>
             } />
             
             <Route path="/" element={<Navigate to="/find-rooms" replace />} />

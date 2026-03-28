@@ -25,8 +25,8 @@ INSERT INTO profiles (user_id, language, branch, cgpa_range, bed_pref, expected_
 
 -- Insert rooms
 INSERT INTO rooms (room_id, owner_id, block, room_type, total_capacity, current_occupancy, use_custom_logic, additional_requirements) VALUES 
-(1, 1, 'Block A', '2-Seater', 2, 1, FALSE, 'Looking for an early bird who keeps the room clean.'),
-(2, 3, 'Block C', '3-Seater', 3, 1, FALSE, 'Chill room, music is fine.');
+(1, 1, 'Block A', '2-Sharing', 2, 1, FALSE, 'Looking for an early bird who keeps the room clean.'),
+(2, 3, 'Block C', '3-Sharing', 3, 1, FALSE, 'Chill room, music is fine.');
 
 -- Insert room requests
 INSERT INTO room_requests (request_id, room_id, user_id, status) VALUES 

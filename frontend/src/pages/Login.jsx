@@ -21,18 +21,18 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="glass-panel w-full max-w-md p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">RoomSync</h1>
-          <p className="text-slate-500 mt-2">Sign in to find your perfect roommate</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2">Sign in to find your perfect roommate</p>
         </div>
         
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-6 text-sm">{error}</div>}
         
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
             <input
               type="email"
               required
@@ -43,7 +43,7 @@ const Login = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
             <input
               type="password"
               required
@@ -58,7 +58,7 @@ const Login = () => {
           </button>
         </form>
         
-        <p className="mt-6 text-center text-sm text-slate-600">
+        <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
           Don't have an account? <Link to="/register" className="text-primary font-semibold hover:underline">Register</Link>
         </p>
       </div>

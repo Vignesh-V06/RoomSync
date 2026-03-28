@@ -59,8 +59,8 @@ const FindRooms = () => {
               <div className="p-6 flex-grow">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-800">{room.block}</h2>
-                    <p className="text-sm font-medium text-primary">{room.room_type}</p>
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{room.block}</h2>
+                    <p className="text-sm font-medium text-primary dark:text-indigo-400">{room.room_type}</p>
                   </div>
                   <div className={`px-3 py-1 rounded-full text-sm font-bold flex items-center ${getScoreColor(room.compatibility_score)}`}>
                     {room.compatibility_score}% Match
@@ -94,10 +94,10 @@ const FindRooms = () => {
                 )}
 
                 <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400 mb-4">
-                  <p><span className="font-semibold text-slate-700">Owner:</span> {room.owner_name}</p>
-                  <p><span className="font-semibold text-slate-700">Occupancy:</span> <span className="text-primary font-medium">{room.current_occupancy}</span> / {room.total_capacity}</p>
+                  <p><span className="font-semibold text-slate-700 dark:text-slate-300">Owner:</span> {room.owner_name}</p>
+                  <p><span className="font-semibold text-slate-700 dark:text-slate-300">Occupancy:</span> <span className="text-primary dark:text-indigo-400 font-medium">{room.current_occupancy}</span> / {room.total_capacity}</p>
                   {room.additional_requirements && (
-                    <div className="mt-3 p-3 bg-slate-50 rounded text-xs italic border border-slate-100">
+                    <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-800/80 rounded text-xs italic border border-slate-100 dark:border-slate-700">
                       "{room.additional_requirements}"
                     </div>
                   )}
