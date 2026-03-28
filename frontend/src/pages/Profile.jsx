@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
+  const [applications, setApplications] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
@@ -21,21 +22,26 @@ const Profile = () => {
   };
 
   const [formData, setFormData] = useState(defaultFormData);
-
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileData = async () => {
       try {
-        const { data } = await api.get(`/profiles/${user.id}`);
-        setProfile(data);
-        setFormData(prev => ({ ...prev, ...data }));
+        const [profileRes, appsRes] = await Promise.all([
+          api.get(`/profiles/${user.id}`),
+          api.get('/rooms/my-applications')
+        ]);
+        setProfile(profileRes.data);
+        setFormData(prev => ({ ...prev, ...profileRes.data }));
+        setApplications(appsRes.data);
       } catch (err) {
-        toast.error('Complete your profile to unlock all features!');
-        setIsEditing(true);
+        if (err?.response?.status === 404) {
+          toast.error('Complete your profile to unlock all features!');
+          setIsEditing(true);
+        }
       } finally {
         setLoading(false);
       }
     };
-    fetchProfile();
+    fetchProfileData();
   }, [user.id]);
 
   const handleSubmit = async (e) => {
@@ -260,10 +266,47 @@ const Profile = () => {
               )}
 
               {activeTab === 'rooms' && (
-                <div className="glass-panel p-12 text-center text-slate-500">
-                   <div className="text-5xl mb-4">🏠</div>
-                   <p className="text-lg font-medium">You haven't joined any rooms yet.</p>
-                   <button onClick={() => navigate('/find-rooms')} className="mt-4 btn-primary text-sm px-4 py-2">Find Rooms</button>
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold mb-4 text-slate-800 dark:text-white flex items-center gap-2">
+                    🏠 Application History
+                  </h3>
+                  {applications.length === 0 ? (
+                    <div className="glass-panel p-12 text-center text-slate-500">
+                      <div className="text-5xl mb-4">📭</div>
+                      <p className="text-lg font-medium">You haven't applied to any rooms yet.</p>
+                      <button onClick={() => navigate('/find-rooms')} className="mt-4 btn-primary text-sm px-4 py-2">Find Rooms</button>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {applications.map(app => (
+                        <div key={app.request_id} className="glass-panel p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-l-4" style={{
+                          borderLeftColor: app.status === 'accepted' ? '#10b981' : app.status === 'rejected' ? '#ef4444' : '#f59e0b'
+                        }}>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">Block {app.block}</h4>
+                              <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-600 dark:text-slate-300">
+                                {app.room_type}
+                              </span>
+                            </div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                              Owner: {app.owner_name}
+                            </p>
+                          </div>
+                          
+                          <div className="flex sm:flex-col items-center sm:items-end gap-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                              app.status === 'accepted' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                              app.status === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                              'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                            }`}>
+                              {app.status === 'applied' ? 'Pending' : app.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -100,3 +100,23 @@ exports.getMyGroups = async (req, res) => {
     res.status(500).json({ message: 'Server error fetching your groups' });
   }
 };
+
+exports.getMyApplications = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [applications] = await pool.query(`
+      SELECT rq.request_id, rq.status, r.room_id, r.block, r.room_type, 
+             u.name as owner_name, u.email as owner_email
+      FROM room_requests rq
+      JOIN rooms r ON rq.room_id = r.room_id
+      JOIN users u ON r.owner_id = u.id
+      WHERE rq.user_id = ?
+      ORDER BY rq.request_id DESC
+    `, [userId]);
+
+    res.json(applications);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error fetching applications' });
+  }
+};

@@ -8,6 +8,7 @@ import FindRooms from './pages/FindRooms';
 import CreateRoom from './pages/CreateRoom';
 import OwnerDashboard from './pages/OwnerDashboard';
 import ChatDashboard from './pages/ChatDashboard';
+import ForgotPassword from './pages/ForgotPassword';
 import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 
@@ -22,6 +23,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             
             <Route path="/profile" element={
               <ProtectedRoute><Profile /></ProtectedRoute>

@@ -43,3 +43,23 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: 'Server error during login' });
   }
 };
+
+exports.directResetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    
+    // Find user
+    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (users.length === 0) return res.status(404).json({ message: 'User with this email not found' });
+    
+    // Hash new password and update
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await pool.query('UPDATE users SET password = ? WHERE email = ?', [hashedPassword, email]);
+    
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error resetting password' });
+  }
+};

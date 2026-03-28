@@ -9,6 +9,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.post('/', authMiddleware, roomController.createRoom);
 router.get('/vacant/:userId', authMiddleware, roomController.getVacantRooms);
 router.get('/my-groups', authMiddleware, roomController.getMyGroups);
+router.get('/my-applications', authMiddleware, roomController.getMyApplications);
 
 // Requests
 router.post('/apply', authMiddleware, requestController.applyRoom);
