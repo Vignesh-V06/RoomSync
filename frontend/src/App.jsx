@@ -7,7 +7,7 @@ import Profile from './pages/Profile';
 import FindRooms from './pages/FindRooms';
 import CreateRoom from './pages/CreateRoom';
 import OwnerDashboard from './pages/OwnerDashboard';
-import RoomChat from './pages/RoomChat';
+import ChatDashboard from './pages/ChatDashboard';
 import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 
@@ -35,8 +35,8 @@ function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute><OwnerDashboard /></ProtectedRoute>
             } />
-            <Route path="/chat/:roomId" element={
-              <ProtectedRoute><RoomChat /></ProtectedRoute>
+            <Route path="/chat" element={
+              <ProtectedRoute><ChatDashboard /></ProtectedRoute>
             } />
             
             <Route path="/" element={<Navigate to="/find-rooms" replace />} />

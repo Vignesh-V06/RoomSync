@@ -78,3 +78,23 @@ exports.getVacantRooms = async (req, res) => {
     res.status(500).json({ message: 'Server error fetching vacant rooms' });
   }
 };
+
+exports.getMyGroups = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Get rooms the user owns
+    // Get rooms the user is accepted in
+    const [rooms] = await pool.query(`
+      SELECT DISTINCT r.room_id, r.block, r.room_type, r.owner_id,
+      (SELECT name FROM users WHERE id = r.owner_id) as owner_name
+      FROM rooms r
+      LEFT JOIN room_requests rq ON r.room_id = rq.room_id
+      WHERE r.owner_id = ? OR (rq.user_id = ? AND rq.status = 'accepted')
+    `, [userId, userId]);
+
+    res.json(rooms);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error fetching your groups' });
+  }
+};

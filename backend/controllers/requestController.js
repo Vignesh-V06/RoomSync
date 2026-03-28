@@ -56,7 +56,7 @@ exports.acceptRequest = async (req, res) => {
     const { request_id } = req.body;
 
     const [requests] = await pool.query(`
-      SELECT rq.*, r.owner_id, r.current_occupancy, r.total_capacity 
+      SELECT rq.*, r.owner_id, r.current_occupancy, r.total_capacity, r.block, r.room_type
       FROM room_requests rq
       JOIN rooms r ON rq.room_id = r.room_id
       WHERE rq.request_id = ?
@@ -82,6 +82,7 @@ exports.acceptRequest = async (req, res) => {
     );
 
     const io = socket.getIo();
+    console.log(`[Socket] Emitting new_notification to user_${request.user_id} for Acceptance`);
     io.to(`user_${request.user_id}`).emit('new_notification', {
       id: result.insertId,
       user_id: request.user_id,
@@ -103,7 +104,7 @@ exports.rejectRequest = async (req, res) => {
     const { request_id } = req.body;
 
     const [requests] = await pool.query(`
-      SELECT rq.*, r.owner_id 
+      SELECT rq.*, r.owner_id, r.block, r.room_type 
       FROM room_requests rq
       JOIN rooms r ON rq.room_id = r.room_id
       WHERE rq.request_id = ?
@@ -115,6 +116,23 @@ exports.rejectRequest = async (req, res) => {
 
     await pool.query("UPDATE room_requests SET status = 'rejected' WHERE request_id = ?", [request_id]);
     
+    const request = requests[0];
+    const message = `Your request to join room ${request.block} (${request.room_type}) has been rejected.`;
+    const [result] = await pool.query(
+      "INSERT INTO notifications (user_id, message) VALUES (?, ?)", 
+      [request.user_id, message]
+    );
+
+    const io = socket.getIo();
+    console.log(`[Socket] Emitting new_notification to user_${request.user_id} for Rejection`);
+    io.to(`user_${request.user_id}`).emit('new_notification', {
+      id: result.insertId,
+      user_id: request.user_id,
+      message,
+      is_read: 0,
+      created_at: new Date()
+    });
+
     res.json({ message: 'Request rejected' });
   } catch (error) {
     console.error(error);

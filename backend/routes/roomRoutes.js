@@ -5,8 +5,10 @@ const requestController = require('../controllers/requestController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // Rooms
+// Rooms
 router.post('/', authMiddleware, roomController.createRoom);
 router.get('/vacant/:userId', authMiddleware, roomController.getVacantRooms);
+router.get('/my-groups', authMiddleware, roomController.getMyGroups);
 
 // Requests
 router.post('/apply', authMiddleware, requestController.applyRoom);

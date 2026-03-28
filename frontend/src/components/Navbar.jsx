@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useState, useEffect } from 'react';
 import { FiBell } from 'react-icons/fi';
@@ -8,6 +8,7 @@ import { initSocket, getSocket } from '../socket';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const { theme, toggleTheme } = useTheme();
@@ -81,6 +82,7 @@ const Navbar = () => {
             <Link to="/profile" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors font-medium">Profile</Link>
             <Link to="/create-room" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors font-medium">Create Room</Link>
             <Link to="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors font-medium">Owner Dashboard</Link>
+            <Link to="/chat" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors font-medium">Chat</Link>
             
             <div className="relative">
               <button 

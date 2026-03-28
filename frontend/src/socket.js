@@ -8,7 +8,11 @@ let socket = null;
 export const initSocket = (userId) => {
   if (!socket) {
     socket = io(SOCKET_URL);
-    if (userId) {
+    socket.on('connect', () => {
+      if (userId) socket.emit('join_user', userId);
+    });
+    // Fallback if it connects synchronously
+    if (socket.connected && userId) {
       socket.emit('join_user', userId);
     }
   }

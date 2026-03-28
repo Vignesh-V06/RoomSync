@@ -69,8 +69,8 @@ const OwnerDashboard = () => {
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Applying for</span>
                   <p className="font-semibold text-slate-700 dark:text-slate-200">{req.block} <span className="font-normal text-slate-500 dark:text-slate-400">• {req.room_type}</span></p>
                 </div>
-                <Link to={`/chat/${req.room_id}`} className="w-full inline-block text-center text-sm font-semibold text-primary dark:text-indigo-400 hover:text-indigo-600 border border-primary/20 dark:border-indigo-500/30 rounded py-2 bg-indigo-50/50 dark:bg-indigo-900/20">
-                  💬 Go to Room Chat
+                <Link to="/chat" className="w-full inline-block text-center text-sm font-semibold text-primary dark:text-indigo-400 hover:text-indigo-600 border border-primary/20 dark:border-indigo-500/30 rounded py-2 bg-indigo-50/50 dark:bg-indigo-900/20">
+                  💬 Go to Chat Dashboard
                 </Link>
               </div>
               
